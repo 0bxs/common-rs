@@ -1,5 +1,5 @@
 use chrono::Local;
-use tracing::{Level, subscriber};
+use tracing::{Level, info, subscriber};
 use tracing_rolling_file::{RollingConditionBase, RollingFileAppender};
 use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::fmt::time::FormatTime;
@@ -44,4 +44,5 @@ pub fn init(env: String) {
             Box::leak(Box::new(guard));
         }
     }
+    info!("Log initialization successful：{}", env);
 }
