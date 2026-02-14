@@ -1,10 +1,10 @@
 pub mod log;
+pub mod mysql;
+pub mod redis;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
     #[test]
-    fn it_works() {
-    }
+    fn it_works() {}
 }
