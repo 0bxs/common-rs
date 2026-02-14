@@ -7,10 +7,18 @@ use tracing::info;
 static CLIENT: OnceLock<Client> = OnceLock::new();
 
 pub async fn init(conf: Redis) -> Result<(), Box<dyn Error>> {
-    let c = Client::open(format!(
-        "redis://{}:{}@{}:{}/{}",
-        conf.username, conf.password, conf.addr, conf.port, conf.db
-    ))?;
+    let c: Client;
+    if conf.username.is_empty() {
+        c = Client::open(format!(
+            "redis://default:{}@{}:{}/{}",
+            conf.password, conf.addr, conf.port, conf.db
+        ))?;
+    } else {
+        c = Client::open(format!(
+            "redis://{}:{}@{}:{}/{}",
+            conf.username, conf.password, conf.addr, conf.port, conf.db
+        ))?;
+    }
     CLIENT.set(c).unwrap();
     info!("Connected to Redis：{}", redis().await?.ping().await?);
     Ok(())
