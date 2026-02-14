@@ -8,7 +8,7 @@ static CLIENT: OnceLock<Client> = OnceLock::new();
 
 pub async fn init(conf: Redis) -> Result<(), Box<dyn Error>> {
     let c = Client::open(format!(
-        "redis://{}:{}@{}:{}/{} ",
+        "redis://{}:{}@{}:{}/{}",
         conf.username, conf.password, conf.addr, conf.port, conf.db
     ))?;
     CLIENT.set(c).unwrap();
