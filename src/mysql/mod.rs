@@ -28,7 +28,7 @@ pub fn mysql() -> &'static Pool<MySql> {
     MYSQL.get().unwrap()
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Mysql {
     pub host: String,
     pub port: u16,
