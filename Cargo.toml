@@ -11,3 +11,4 @@ tracing-rolling-file = { version = "0.1.3", features = ["non-blocking"] }
 tracing-appender = "0.2.4"
 sqlx = { version = "0.8.6", features = ["runtime-tokio-native-tls", "mysql"] }
 redis = { version = "1.0.3", features = ["tokio-comp", "json", "cluster"] }
+urlencoding = "2.1.3"

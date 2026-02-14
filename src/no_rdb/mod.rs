@@ -3,6 +3,7 @@ use redis::{AsyncTypedCommands, Client, RedisResult};
 use std::error::Error;
 use std::sync::OnceLock;
 use tracing::info;
+use urlencoding::encode;
 
 static CLIENT: OnceLock<Client> = OnceLock::new();
 
@@ -10,8 +11,11 @@ pub async fn init(conf: Redis) -> Result<(), Box<dyn Error>> {
     let c: Client;
     if conf.username.is_empty() {
         c = Client::open(format!(
-            "redis://default:{}@{}:{}/{}",
-            conf.password, conf.addr, conf.port, conf.db
+            "redis://:{}@{}:{}/{}",
+            encode(conf.password.as_str()),
+            conf.addr,
+            conf.port,
+            conf.db
         ))?;
     } else {
         c = Client::open(format!(

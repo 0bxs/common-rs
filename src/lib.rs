@@ -9,6 +9,7 @@ pub use tracing;
 pub use tracing_appender;
 pub use tracing_rolling_file;
 pub use tracing_subscriber;
+pub use urlencoding;
 
 #[cfg(test)]
 mod tests {
