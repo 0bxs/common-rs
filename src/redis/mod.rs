@@ -24,6 +24,7 @@ pub async fn redis() -> RedisResult<MultiplexedConnection> {
     client().get_multiplexed_async_connection().await
 }
 
+#[derive(Debug)]
 pub struct Redis {
     pub addr: String,
     pub username: String,
