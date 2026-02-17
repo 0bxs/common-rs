@@ -9,8 +9,6 @@ pub mod utils;
 pub use chrono;
 pub use moka;
 pub use redis;
-pub use sqlx;
-pub use sqlx::FromRow;
 pub use tracing;
 pub use tracing_appender;
 pub use tracing_rolling_file;
