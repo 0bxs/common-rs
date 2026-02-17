@@ -23,7 +23,6 @@ pub mod str {
                 set.insert(b as i16);
             }
         }
-        for b in bytes.into_iter() {}
         set
     }
 }
