@@ -10,8 +10,9 @@ use std::time::Duration;
 static CACHE: OnceLock<Cache<i64, HashSet<i16>>> = OnceLock::new();
 static KEY: OnceLock<String> = OnceLock::new();
 
-pub async fn init(cap: u64, exp: Duration) {
+pub async fn init(key: String, cap: u64, exp: Duration) {
     CACHE.set(Cache::builder().max_capacity(cap).time_to_idle(exp).build()).unwrap();
+    KEY.set(key).unwrap();
 }
 
 fn cache() -> &'static Cache<i64, HashSet<i16>> {
