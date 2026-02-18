@@ -17,7 +17,7 @@ pub async fn init(conf: Mysql) -> Result<(), DbErr> {
         .acquire_timeout(conf.acquire_timeout)
         .idle_timeout(conf.idle_timeout)
         .max_lifetime(conf.max_lifetime)
-        .sqlx_logging(conf.show_sqlx)
+        .sqlx_logging(conf.show_sql)
         .sqlx_logging_level(log::LevelFilter::Info);
     MYSQL.set(Database::connect(opt).await?).unwrap();
     mysql().ping().await?;
@@ -46,5 +46,5 @@ pub struct Mysql {
     pub connect_timeout: Duration,
     // 等待获取链接超时时间
     pub acquire_timeout: Duration,
-    pub show_sqlx: bool,
+    pub show_sql: bool,
 }
