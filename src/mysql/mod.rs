@@ -1,26 +1,20 @@
 use sea_orm::{ConnectOptions, Database, DatabaseConnection, DbErr};
 use std::sync::OnceLock;
 use std::time::Duration;
-use tracing::log;
+use tracing::{info, log};
 
 static MYSQL: OnceLock<DatabaseConnection> = OnceLock::new();
 
 pub async fn init(conf: Mysql) -> Result<(), DbErr> {
-    let url = format!(
-        "mysql://{}:{}@{}/{}",
-        conf.username, conf.password, conf.host, conf.database
-    );
+    let url = format!("mysql://{}:{}@{}/{}", conf.username, conf.password, conf.host, conf.database);
     let mut opt = ConnectOptions::new(url);
-    opt.max_connections(conf.max_connection)
-        .min_connections(conf.min_connection)
-        .connect_timeout(conf.connect_timeout)
-        .acquire_timeout(conf.acquire_timeout)
-        .idle_timeout(conf.idle_timeout)
-        .max_lifetime(conf.max_lifetime)
-        .sqlx_logging(conf.show_sql)
+    opt.max_connections(conf.max_connection).min_connections(conf.min_connection)
+        .connect_timeout(conf.connect_timeout).acquire_timeout(conf.acquire_timeout)
+        .idle_timeout(conf.idle_timeout).max_lifetime(conf.max_lifetime).sqlx_logging(conf.show_sql)
         .sqlx_logging_level(log::LevelFilter::Info);
     MYSQL.set(Database::connect(opt).await?).unwrap();
     mysql().ping().await?;
+    info!("mysql successfully initialized");
     Ok(())
 }
 

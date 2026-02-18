@@ -16,13 +16,8 @@ impl FormatTime for LocalTime {
 pub fn init(env: String) {
     match env.as_str() {
         "dev" => {
-            tracing_subscriber::fmt()
-                .with_span_events(FmtSpan::CLOSE)
-                .with_max_level(Level::DEBUG)
-                .with_timer(LocalTime)
-                .with_line_number(true)
-                .with_ansi(true)
-                .init();
+            tracing_subscriber::fmt().with_span_events(FmtSpan::CLOSE).with_max_level(Level::DEBUG)
+                .with_timer(LocalTime).with_line_number(true).with_ansi(true).init();
         }
         _ => {
             let appender = RollingFileAppender::new(
@@ -30,16 +25,12 @@ pub fn init(env: String) {
                 RollingConditionBase::new().max_size(10 * 1024 * 1024),
                 100,
             )
-            .expect("create rolling file appender failed");
+                .expect("create rolling file appender failed");
             let (non_blocking, guard) = tracing_appender::non_blocking(appender);
             let subscriber = FmtSubscriber::builder()
-                .with_span_events(FmtSpan::CLOSE)
-                .with_max_level(Level::DEBUG)
-                .with_timer(LocalTime)
-                .with_line_number(true)
-                .with_writer(non_blocking)
-                .with_ansi(false)
-                .finish();
+                .with_span_events(FmtSpan::CLOSE).with_max_level(Level::DEBUG)
+                .with_timer(LocalTime).with_line_number(true).with_writer(non_blocking)
+                .with_ansi(false).finish();
             subscriber::set_global_default(subscriber).expect("Failed to set subscriber");
             Box::leak(Box::new(guard));
         }

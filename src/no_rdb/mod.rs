@@ -10,18 +10,11 @@ static CLIENT: OnceLock<Client> = OnceLock::new();
 pub async fn init(conf: Redis) -> Result<(), Box<dyn Error>> {
     let c: Client;
     if conf.username.is_empty() {
-        c = Client::open(format!(
-            "redis://:{}@{}:{}/{}",
-            encode(conf.password.as_str()),
-            conf.addr,
-            conf.port,
-            conf.db
-        ))?;
+        c = Client::open(format!("redis://:{}@{}:{}/{}", encode(conf.password.as_str()),
+                                 conf.addr, conf.port, conf.db))?;
     } else {
-        c = Client::open(format!(
-            "redis://{}:{}@{}:{}/{}",
-            conf.username, conf.password, conf.addr, conf.port, conf.db
-        ))?;
+        c = Client::open(format!("redis://{}:{}@{}:{}/{}", conf.username, conf.password,
+                                 conf.addr, conf.port, conf.db))?;
     }
     CLIENT.set(c).unwrap();
     info!("Connected to Redis：{}", redis().await?.ping().await?);
