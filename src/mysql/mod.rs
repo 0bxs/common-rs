@@ -1,37 +1,36 @@
-use sqlx::mysql::{MySqlConnectOptions, MySqlPoolOptions};
-use sqlx::{Connection, MySql, Pool};
-use std::error::Error;
+use sea_orm::{ConnectOptions, Database, DatabaseConnection, DbErr};
 use std::sync::OnceLock;
 use std::time::Duration;
+use tracing::log;
 
-static MYSQL: OnceLock<Pool<MySql>> = OnceLock::new();
+static MYSQL: OnceLock<DatabaseConnection> = OnceLock::new();
 
-pub async fn init(conf: Mysql) -> Result<(), Box<dyn Error>> {
-    let pool = MySqlPoolOptions::new()
-        .max_connections(conf.max_connection)
+pub async fn init(conf: Mysql) -> Result<(), DbErr> {
+    let url = format!(
+        "mysql://{}:{}@{}/{}",
+        conf.username, conf.password, conf.host, conf.database
+    );
+    let mut opt = ConnectOptions::new(url);
+    opt.max_connections(conf.max_connection)
         .min_connections(conf.min_connection)
-        .max_lifetime(conf.max_lifetime)
+        .connect_timeout(conf.connect_timeout)
+        .acquire_timeout(conf.acquire_timeout)
         .idle_timeout(conf.idle_timeout)
-        .connect_lazy_with(
-            MySqlConnectOptions::new()
-                .host(&conf.host)
-                .port(conf.port)
-                .username(&conf.username)
-                .password(&conf.password)
-                .database(&conf.database),
-        );
-    MYSQL.set(pool).unwrap();
-    Ok(mysql().acquire().await?.ping().await?)
+        .max_lifetime(conf.max_lifetime)
+        .sqlx_logging(false)
+        .sqlx_logging_level(log::LevelFilter::Info);
+    MYSQL.set(Database::connect(opt).await?).unwrap();
+    mysql().ping().await?;
+    Ok(())
 }
 
-pub fn mysql() -> &'static Pool<MySql> {
+pub fn mysql() -> &'static DatabaseConnection {
     MYSQL.get().unwrap()
 }
 
 #[derive(Debug, Clone)]
 pub struct Mysql {
     pub host: String,
-    pub port: u16,
     pub username: String,
     pub password: String,
     pub database: String,
@@ -43,4 +42,8 @@ pub struct Mysql {
     pub max_lifetime: Duration,
     // 设置空闲超时时间
     pub idle_timeout: Duration,
+    // 设置连接超时时间
+    pub connect_timeout: Duration,
+    // 等待获取链接超时时间
+    pub acquire_timeout: Duration,
 }
