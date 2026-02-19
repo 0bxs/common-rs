@@ -4,7 +4,7 @@ use actix_web::web::Json;
 use serde::Serialize;
 
 #[derive(Serialize)]
-pub(crate) struct ResErr {
+pub struct ResErr {
     pub code: u8,
     pub msg: Cow<'static, str>,
 }
