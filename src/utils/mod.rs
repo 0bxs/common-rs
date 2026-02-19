@@ -1,4 +1,5 @@
 pub mod moka;
+pub mod request;
 
 pub mod set {
     use std::collections::HashSet;
