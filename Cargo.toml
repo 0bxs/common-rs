@@ -7,7 +7,7 @@ edition = "2024"
 chrono = "*"
 moka = { version = "*", features = ["future"] }
 redis = { version = "*", features = ["tokio-comp", "json", "cluster"] }
-sea-orm = { version = "*", features = ["sqlx-mysql", "runtime-tokio-rustls", "macros"] }
+sea-orm = { version = "2.0.0-rc.32", features = ["sqlx-mysql", "runtime-tokio-rustls", "macros"] }
 tracing = "*"
 tracing-subscriber = "*"
 tracing-rolling-file = { version = "*", features = ["non-blocking"] }
