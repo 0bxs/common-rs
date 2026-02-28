@@ -19,7 +19,6 @@ pub use tracing_subscriber;
 pub use urlencoding;
 pub use reqwest;
 pub use aliyun_oss_rust_sdk;
-pub use serde;
 pub use serde_json;
 pub use hmac;
 pub use sha2;

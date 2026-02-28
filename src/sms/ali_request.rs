@@ -11,6 +11,7 @@ use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
 use chrono::Utc;
 use hmac::digest::InvalidLength;
+use rand::random_range;
 use crate::utils::request::client;
 
 // URL编码处理
@@ -44,7 +45,7 @@ pub fn hmac256(key: &[u8], message: &str) -> Result<Vec<u8>, InvalidLength> {
 pub fn generate_random_string(length: usize) -> String {
     const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
     (0..length)
-        .map(|_| CHARSET[rand::random_range(0..CHARSET.len())] as char)
+        .map(|_| CHARSET[random_range(0..CHARSET.len())] as char)
         .collect()
 }
 pub fn generate_nonce() -> String {

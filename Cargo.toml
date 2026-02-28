@@ -23,5 +23,4 @@ hex = "*"
 percent-encoding = "*"
 dyn-fmt = "*"
 base64 = "*"
-rand = "*"
-
+rand = "0.10.0"
