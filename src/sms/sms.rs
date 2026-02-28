@@ -48,7 +48,7 @@ fn conf() -> &'static Sms {
     CONF.get().unwrap()
 }
 
-pub(crate) async fn send(query: Vec<(&str, &str)>) -> Result<(StatusCode, AliResVo), Box<dyn Error>> {
+pub async fn send(query: Vec<(&str, &str)>) -> Result<(StatusCode, AliResVo), Box<dyn Error>> {
     let res = call_api(Method::POST, HOST, CANONICAL_URI, &query, ACTION,
                        VERSION, RequestBody::None, conf().access_key.as_str(),
                        conf().secret_key.as_str()).await?;
