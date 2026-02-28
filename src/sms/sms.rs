@@ -21,7 +21,7 @@ pub struct Template {
     pub limit_time: u64,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct AliResVo {
     #[serde(rename = "Code")]
     pub code: String,
