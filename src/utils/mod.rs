@@ -27,3 +27,13 @@ pub mod str {
         set
     }
 }
+
+pub mod encipher {
+    const JWT_SECRET: u8 = 7;
+
+    pub fn jwt(bytes: &mut [u8]) {
+        for b in bytes.iter_mut() {
+            *b ^= JWT_SECRET;
+        }
+    }
+}
