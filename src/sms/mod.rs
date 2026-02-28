@@ -1,2 +1,2 @@
 pub mod sms;
-pub mod ali_request;
+mod ali_request;
