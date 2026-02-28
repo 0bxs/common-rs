@@ -14,4 +14,14 @@ tracing-rolling-file = { version = "*", features = ["non-blocking"] }
 tracing-appender = "*"
 urlencoding = "*"
 reqwest = "*"
+aliyun-oss-rust-sdk = "*"
+serde = { version = "*", features = ["derive"] }
+serde_json = "*"
+hmac = "*"
+sha2 = "*"
+hex = "*"
+percent-encoding = "*"
+dyn-fmt = "*"
+base64 = "*"
+rand = "*"
 
