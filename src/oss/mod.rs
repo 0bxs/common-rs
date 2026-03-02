@@ -4,7 +4,7 @@ use aliyun_oss_rust_sdk::request::RequestBuilder;
 use aliyun_oss_rust_sdk::url::UrlApi;
 
 #[derive(Debug, Clone)]
-pub struct Conf {
+pub struct Oss {
     pub access_key: String,
     pub secret_key: String,
     pub bucket: String,
@@ -16,7 +16,7 @@ static BUCKET: OnceLock<OSS> = OnceLock::new();
 
 static BUILDER: OnceLock<RequestBuilder> = OnceLock::new();
 
-pub fn init(conf: Conf) {
+pub fn init(conf: Oss) {
     let endpoint = conf.endpoint;
     BUCKET.set(OSS::new(conf.access_key, conf.secret_key, endpoint.clone(), conf.bucket)).unwrap();
     let mut builder = RequestBuilder::new().with_expire(60);
