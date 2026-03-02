@@ -18,17 +18,17 @@ static PUT_BUILDER: OnceLock<RequestBuilder> = OnceLock::new();
 
 static GET_BUILDER: OnceLock<RequestBuilder> = OnceLock::new();
 
-pub fn init(conf: Oss) {
+pub fn init(conf: Oss, expire: i64, content_type: &str) {
     let endpoint = conf.endpoint;
     BUCKET.set(OSS::new(conf.access_key, conf.secret_key, endpoint.clone(), conf.bucket)).unwrap();
-    let mut builder = RequestBuilder::new().with_expire(60).
-        with_content_type("text/plain");
+    let mut builder = RequestBuilder::new().with_expire(expire).
+        with_content_type(content_type);
     if conf.cdn {
         builder.cdn = Some(endpoint.clone());
     }
     PUT_BUILDER.set(builder).unwrap();
 
-    let mut builder = RequestBuilder::new().with_expire(60);
+    let mut builder = RequestBuilder::new().with_expire(expire);
     if conf.cdn {
         builder.cdn = Some(endpoint);
     }
