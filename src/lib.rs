@@ -17,7 +17,6 @@ pub use tracing_appender;
 pub use tracing_rolling_file;
 pub use tracing_subscriber;
 pub use urlencoding;
-pub use reqwest;
 pub use aliyun_oss_rust_sdk;
 pub use serde_json;
 pub use hmac;
