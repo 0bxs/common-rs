@@ -19,7 +19,7 @@ macro_rules! page_dto {
 pub struct PageDto {
     #[validate(range(min = 0))]
     pub page_num: u64,
-    #[validate(range(min = 0))]
+    #[validate(range(min = 1))]
     pub page_size: u64,
     #[validate(length(min = 1))]
     pub order_by: String,
