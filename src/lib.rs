@@ -7,6 +7,8 @@ pub mod utils;
 pub mod enums;
 pub mod oss;
 pub mod sms;
+pub mod vo;
+pub mod dto;
 
 pub use chrono;
 pub use moka;
