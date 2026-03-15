@@ -13,7 +13,7 @@ tracing-subscriber = "*"
 tracing-rolling-file = { version = "*", features = ["non-blocking"] }
 tracing-appender = "*"
 urlencoding = "*"
-reqwest = "*"
+reqwest = { version = "*", features = ["stream"] }
 aliyun-oss-rust-sdk = "*"
 serde = { version = "*", features = ["derive"] }
 serde_json = "*"
@@ -25,4 +25,3 @@ dyn-fmt = "*"
 base64 = "*"
 rand = "0.10.0"
 validator = { version = "*", features = ["derive"] }
-sea-orm-migration = "2.0.0-rc.32"
