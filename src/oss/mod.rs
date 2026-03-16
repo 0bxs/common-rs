@@ -14,9 +14,7 @@ pub struct Oss {
 
 static BUCKET: OnceLock<OSS> = OnceLock::new();
 
-static PUT_BUILDER0: OnceLock<RequestBuilder> = OnceLock::new();
-
-static PUT_BUILDER1: OnceLock<RequestBuilder> = OnceLock::new();
+static PUT_BUILDER: OnceLock<RequestBuilder> = OnceLock::new();
 
 static GET_BUILDER: OnceLock<RequestBuilder> = OnceLock::new();
 
@@ -28,8 +26,7 @@ pub fn init(conf: Oss, expire: i64, content_type: &str) {
     if conf.cdn {
         builder.cdn = Some(endpoint.clone());
     }
-    PUT_BUILDER0.set(builder.clone()).unwrap();
-    PUT_BUILDER1.set(builder.oss_header_put("x-oss-acl", "public-read")).unwrap();
+    PUT_BUILDER.set(builder).unwrap();
 
     let mut builder = RequestBuilder::new().with_expire(expire);
     if conf.cdn {
@@ -42,24 +39,16 @@ fn bucket() -> &'static OSS {
     BUCKET.get().unwrap()
 }
 
-fn put_builder0() -> &'static RequestBuilder {
-    PUT_BUILDER0.get().unwrap()
-}
-
-fn put_builder1() -> &'static RequestBuilder {
-    PUT_BUILDER1.get().unwrap()
+fn put_builder() -> &'static RequestBuilder {
+    PUT_BUILDER.get().unwrap()
 }
 
 fn get_builder() -> &'static RequestBuilder {
     GET_BUILDER.get().unwrap()
 }
 
-pub fn put_auth_url(file_path: &str, is_public: bool) -> String {
-    if is_public {
-        bucket().sign_upload_url(file_path, put_builder1())
-    } else {
-        bucket().sign_upload_url(file_path, put_builder0())
-    }
+pub fn put_auth_url(file_path: &str) -> String {
+    bucket().sign_upload_url(file_path, put_builder())
 }
 
 pub fn get_auth_url(file_path: &str) -> String {
