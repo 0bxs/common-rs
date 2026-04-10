@@ -2,11 +2,12 @@ use sea_orm::{ConnectOptions, Database, DatabaseConnection, DbErr};
 use std::sync::OnceLock;
 use std::time::Duration;
 use tracing::{info, log};
+use urlencoding::encode;
 
 static MYSQL: OnceLock<DatabaseConnection> = OnceLock::new();
 
 pub async fn init(conf: Mysql) -> Result<(), DbErr> {
-    let url = format!("mysql://{}:{}@{}/{}", conf.username, conf.password, conf.host, conf.database);
+    let url = format!("mysql://{}:{}@{}/{}", conf.username, encode(&conf.password), conf.host, conf.database);
     let mut opt = ConnectOptions::new(url);
     opt.max_connections(conf.max_connection).min_connections(conf.min_connection)
         .connect_timeout(conf.connect_timeout).acquire_timeout(conf.acquire_timeout)
