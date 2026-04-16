@@ -6,12 +6,15 @@ use redis::{AsyncTypedCommands, RedisError};
 use std::collections::HashSet;
 use std::sync::OnceLock;
 use std::time::Duration;
+use bb8::RunError;
 
 static CACHE: OnceLock<Cache<i64, HashSet<i16>>> = OnceLock::new();
 static KEY: OnceLock<String> = OnceLock::new();
 
 pub fn init(key: String, cap: u64, exp: Duration) {
-    CACHE.set(Cache::builder().max_capacity(cap).time_to_idle(exp).build()).unwrap();
+    CACHE
+        .set(Cache::builder().max_capacity(cap).time_to_idle(exp).build())
+        .unwrap();
     KEY.set(key).unwrap();
 }
 
@@ -27,11 +30,11 @@ fn key(id: i64) -> String {
     format!("{}{}", key0(), id)
 }
 
-pub async fn get(id: i64) -> Result<Option<HashSet<i16>>, RedisError> {
+pub async fn get(id: i64) -> Result<Option<HashSet<i16>>, RunError<RedisError>> {
     if let Some(v) = cache().get(&id).await {
         Ok(Some(v))
     } else {
-        if let Some(old) = redis().await?.get(key(id)).await? {
+        if let Some(old) = redis().get().await?.get(key(id)).await? {
             let set = to_set(old);
             cache().insert(id, set.clone()).await;
             return Ok(Some(set));
@@ -40,14 +43,14 @@ pub async fn get(id: i64) -> Result<Option<HashSet<i16>>, RedisError> {
     }
 }
 
-pub async fn set(id: i64, set: HashSet<i16>) -> Result<(), RedisError> {
-    redis().await?.set(key(id), to_bytes(set.clone())).await?;
+pub async fn set(id: i64, set: HashSet<i16>) -> Result<(), RunError<RedisError>> {
+    redis().get().await?.set(key(id), to_bytes(set.clone())).await?;
     cache().insert(id, set).await;
     Ok(())
 }
 
-pub async fn del(id: i64) -> Result<(), RedisError> {
-    redis().await?.del(key(id)).await?;
+pub async fn del(id: i64) -> Result<(), RunError<RedisError>> {
+    redis().get().await?.del(key(id)).await?;
     cache().remove(&id).await;
     Ok(())
 }

@@ -1,5 +1,5 @@
-use std::sync::OnceLock;
 use reqwest::Client;
+use std::sync::OnceLock;
 
 static CLIENT: OnceLock<Client> = OnceLock::new();
 

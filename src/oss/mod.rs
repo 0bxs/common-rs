@@ -1,7 +1,7 @@
-use std::sync::OnceLock;
 use aliyun_oss_rust_sdk::oss::OSS;
 use aliyun_oss_rust_sdk::request::RequestBuilder;
 use aliyun_oss_rust_sdk::url::UrlApi;
+use std::sync::OnceLock;
 
 #[derive(Debug, Clone)]
 pub struct Oss {
@@ -20,9 +20,17 @@ static GET_BUILDER: OnceLock<RequestBuilder> = OnceLock::new();
 
 pub fn init(conf: Oss, expire: i64, content_type: &str) {
     let endpoint = conf.endpoint;
-    BUCKET.set(OSS::new(conf.access_key, conf.secret_key, endpoint.clone(), conf.bucket)).unwrap();
-    let mut builder = RequestBuilder::new().with_expire(expire).
-        with_content_type(content_type);
+    BUCKET
+        .set(OSS::new(
+            conf.access_key,
+            conf.secret_key,
+            endpoint.clone(),
+            conf.bucket,
+        ))
+        .unwrap();
+    let mut builder = RequestBuilder::new()
+        .with_expire(expire)
+        .with_content_type(content_type);
     if conf.cdn {
         builder.cdn = Some(endpoint.clone());
     }

@@ -1,9 +1,9 @@
+use crate::sms::ali_request::{RequestBody, call_api};
 use reqwest::{Method, StatusCode};
-use std::collections::{HashMap};
+use serde::Deserialize;
+use std::collections::HashMap;
 use std::error::Error;
 use std::sync::OnceLock;
-use serde::{Deserialize};
-use crate::sms::ali_request::{call_api, RequestBody};
 
 #[derive(Debug, Clone)]
 pub struct Sms {
@@ -49,9 +49,20 @@ fn conf() -> &'static Sms {
 }
 
 pub async fn send(query: Vec<(&str, &str)>) -> Result<(StatusCode, AliResVo), Box<dyn Error>> {
-    let res = call_api(Method::POST, HOST, CANONICAL_URI, &query, ACTION,
-                       VERSION, RequestBody::None, conf().access_key.as_str(),
-                       conf().secret_key.as_str()).await?;
-    Ok((res.status(), serde_json::from_slice::<AliResVo>(res.bytes().await?.to_vec().as_slice())?))
+    let res = call_api(
+        Method::POST,
+        HOST,
+        CANONICAL_URI,
+        &query,
+        ACTION,
+        VERSION,
+        RequestBody::None,
+        conf().access_key.as_str(),
+        conf().secret_key.as_str(),
+    )
+    .await?;
+    Ok((
+        res.status(),
+        serde_json::from_slice::<AliResVo>(res.bytes().await?.to_vec().as_slice())?,
+    ))
 }
-

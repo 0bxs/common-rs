@@ -3,6 +3,7 @@ use moka::future::Cache;
 use redis::{AsyncTypedCommands, RedisError};
 use std::sync::OnceLock;
 use std::time::Duration;
+use bb8::RunError;
 
 static CACHE: OnceLock<Cache<i64, i64>> = OnceLock::new();
 static KEY: OnceLock<String> = OnceLock::new();
@@ -31,11 +32,11 @@ fn exp() -> &'static u64 {
     EXP.get().unwrap()
 }
 
-pub async fn get(id: i64) -> Result<Option<i64>, RedisError> {
+pub async fn get(id: i64) -> Result<Option<i64>, RunError<RedisError>> {
     if let Some(old) = cache().get(&id).await {
         Ok(Some(old))
     } else {
-        let result = redis().await?.get_int(key(id)).await?;
+        let result = redis().get().await?.get_int(key(id)).await?;
         if let Some(old0) = result {
             let old1 = old0 as i64;
             cache().insert(id, old1).await;
@@ -46,24 +47,24 @@ pub async fn get(id: i64) -> Result<Option<i64>, RedisError> {
     }
 }
 
-pub async fn set(id: i64, exp0: i64) -> Result<(), RedisError> {
+pub async fn set(id: i64, exp0: i64) -> Result<(), RunError<RedisError>> {
     cache().insert(id, exp0).await;
-    redis().await?.pset_ex(key(id), exp0, exp().clone()).await?;
+    redis().get().await?.pset_ex(key(id), exp0, exp().clone()).await?;
     Ok(())
 }
 
-pub async fn del(id: i64) -> Result<(), RedisError> {
+pub async fn del(id: i64) -> Result<(), RunError<RedisError>> {
     cache().remove(&id).await;
-    redis().await?.del(key(id)).await?;
+    redis().get().await?.del(key(id)).await?;
     Ok(())
 }
 
-pub async fn kick_out(ids: Vec<i64>) -> Result<(), RedisError> {
+pub async fn kick_out(ids: Vec<i64>) -> Result<(), RunError<RedisError>> {
     let mut keys = Vec::new();
     for id in ids {
         cache().remove(&id).await;
         keys.push(key(id));
     }
-    redis().await?.del(keys).await?;
+    redis().get().await?.del(keys).await?;
     Ok(())
 }

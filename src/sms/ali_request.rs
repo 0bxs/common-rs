@@ -1,18 +1,21 @@
+use crate::utils::request::client;
+use base64::Engine;
+use base64::engine::general_purpose::STANDARD;
+use chrono::Utc;
 use core::str;
-use std::collections::{BTreeMap, HashMap};
+use hmac::digest::InvalidLength;
 use hmac::{Hmac, Mac};
 use percent_encoding::{NON_ALPHANUMERIC, utf8_percent_encode};
-use serde_json::{json, Value};
-use std::borrow::Cow;
-use std::error::Error;
-use reqwest::{header::{HeaderMap, HeaderValue}, Method, Response};
-use sha2::{Digest, Sha256};
-use base64::engine::general_purpose::STANDARD;
-use base64::Engine;
-use chrono::Utc;
-use hmac::digest::InvalidLength;
 use rand::random_range;
-use crate::utils::request::client;
+use reqwest::{
+    Method, Response,
+    header::{HeaderMap, HeaderValue},
+};
+use serde_json::{Value, json};
+use sha2::{Digest, Sha256};
+use std::borrow::Cow;
+use std::collections::{BTreeMap, HashMap};
+use std::error::Error;
 
 // URL编码处理
 pub fn percent_code(encode_str: &str) -> Cow<'_, str> {
@@ -74,8 +77,8 @@ pub enum FormValue {
 }
 // 定义一个body请求体枚举，用于统一处理请求体类型,包含Json/Binary/FormData类型
 pub enum RequestBody {
-    Json(HashMap<String, Value>), // Json
-    Binary(Vec<u8>), // Binary
+    Json(HashMap<String, Value>),         // Json
+    Binary(Vec<u8>),                      // Binary
     FormData(HashMap<String, FormValue>), //  FormData
     None,
 }
@@ -91,32 +94,25 @@ pub async fn call_api(
     access_key_id: &str,
     access_key_secret: &str,
 ) -> Result<Response, Box<dyn Error>> {
-
     // 根据 body 类型处理请求体内容,将处理后的存储在 body_content 变量中。
     let body_content = match &body {
         RequestBody::Json(body_map) => json!(body_map).to_string(),
-        RequestBody::Binary(binary_data) => {
-            STANDARD.encode(binary_data)
-        }
+        RequestBody::Binary(binary_data) => STANDARD.encode(binary_data),
         RequestBody::FormData(form_data) => {
             let params: Vec<String> = form_data
                 .iter()
-                .flat_map(|(k, v)| {
-                    match v {
-                        FormValue::String(s) => {
-                            vec![format!("{}={}", percent_code(k), percent_code(&s))]
-                        }
-                        FormValue::Vec(vec) => {
-                            vec.iter()
-                                .map(|s| format!("{}={}", percent_code(k), percent_code(s)))
-                                .collect::<Vec<_>>()
-                        }
-                        FormValue::HashMap(map) => {
-                            map.iter()
-                                .map(|(sk, sv)| format!("{}={}", percent_code(sk), percent_code(sv)))
-                                .collect::<Vec<_>>()
-                        }
+                .flat_map(|(k, v)| match v {
+                    FormValue::String(s) => {
+                        vec![format!("{}={}", percent_code(k), percent_code(&s))]
                     }
+                    FormValue::Vec(vec) => vec
+                        .iter()
+                        .map(|s| format!("{}={}", percent_code(k), percent_code(s)))
+                        .collect::<Vec<_>>(),
+                    FormValue::HashMap(map) => map
+                        .iter()
+                        .map(|(sk, sv)| format!("{}={}", percent_code(sk), percent_code(sv)))
+                        .collect::<Vec<_>>(),
                 })
                 .collect();
             params.join("&")
@@ -151,8 +147,14 @@ pub async fn call_api(
     headers.insert("x-acs-action", HeaderValue::from_str(action)?);
     headers.insert("x-acs-version", HeaderValue::from_str(version)?);
     headers.insert("x-acs-date", HeaderValue::from_str(&datetime_str)?);
-    headers.insert("x-acs-signature-nonce", HeaderValue::from_str(&signature_nonce)?);
-    headers.insert("x-acs-content-sha256", HeaderValue::from_str(&hashed_request_payload)?);
+    headers.insert(
+        "x-acs-signature-nonce",
+        HeaderValue::from_str(&signature_nonce)?,
+    );
+    headers.insert(
+        "x-acs-content-sha256",
+        HeaderValue::from_str(&hashed_request_payload)?,
+    );
     // 2.构造待签名请求头
     let canonical_query_string = build_sored_encoded_query_string(query_params); // 参数编码拼接处理
     let canonical_request = format!(
@@ -160,7 +162,11 @@ pub async fn call_api(
         method.as_str(),
         canonical_uri,
         canonical_query_string,
-        sign_header_arr.iter().map(|&header| format!("{}:{}", header, headers[header].to_str().unwrap())).collect::<Vec<_>>().join("\n"),
+        sign_header_arr
+            .iter()
+            .map(|&header| format!("{}:{}", header, headers[header].to_str().unwrap()))
+            .collect::<Vec<_>>()
+            .join("\n"),
         sign_headers,
         hashed_request_payload
     );
@@ -180,7 +186,10 @@ pub async fn call_api(
     // 构造 url 拼接请求参数
     let url: String;
     if !query_params.is_empty() {
-        url = format!("https://{}{}?{}", host, canonical_uri, canonical_query_string);
+        url = format!(
+            "https://{}{}?{}",
+            host, canonical_uri, canonical_query_string
+        );
     } else {
         url = format!("https://{}{}", host, canonical_uri);
     }
@@ -192,8 +201,8 @@ async fn send_request(
     method: Method,
     url: &str,
     headers: HeaderMap,
-    body: &RequestBody,                // 用此判断 body 数据类型
-    body_content: &str,                // body 不为空时 接收 body 请求参数 FormData/Json/Binary
+    body: &RequestBody, // 用此判断 body 数据类型
+    body_content: &str, // body 不为空时 接收 body 请求参数 FormData/Json/Binary
 ) -> Result<Response, reqwest::Error> {
     let mut request_builder = client().request(method.clone(), url);
     // 添加请求头 headers
@@ -210,13 +219,15 @@ async fn send_request(
             // 如果body为map，且不为空，转化为Json后存储在 body_content 变量中，设置  application/json; charset=utf-8
             if !body_content.is_empty() {
                 request_builder = request_builder.body(body_content.to_string());
-                request_builder = request_builder.header("Content-Type", "application/json; charset=utf-8");
+                request_builder =
+                    request_builder.header("Content-Type", "application/json; charset=utf-8");
             }
         }
         RequestBody::FormData(_) => {
             // 处理 form-data 类型，设置 content-type
             if !body_content.is_empty() {
-                request_builder = request_builder.header("Content-Type", "application/x-www-form-urlencoded");
+                request_builder =
+                    request_builder.header("Content-Type", "application/x-www-form-urlencoded");
                 request_builder = request_builder.body(body_content.to_string());
             }
         }

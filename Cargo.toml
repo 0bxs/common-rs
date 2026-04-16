@@ -6,7 +6,9 @@ edition = "2024"
 [dependencies]
 chrono = "*"
 moka = { version = "*", features = ["future"] }
-redis = { version = "*", features = ["tokio-comp", "json", "cluster"] }
+bb8 = "*"
+bb8-redis = "*"
+redis = { version = "*", features = ["tokio-comp", "json", "cluster", "bb8"] }
 sea-orm = { version = "2.0.0-rc.32", features = ["sqlx-mysql", "runtime-tokio-rustls", "macros"] }
 tracing = "*"
 tracing-subscriber = "*"
@@ -23,5 +25,5 @@ hex = "*"
 percent-encoding = "*"
 dyn-fmt = "*"
 base64 = "*"
-rand = "0.10.0"
+rand = "*"
 validator = { version = "*", features = ["derive"] }
