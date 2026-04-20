@@ -1,12 +1,11 @@
-use bb8::{Pool};
-use redis::{AsyncTypedCommands, RedisResult};
+use bb8::{ManageConnection, Pool};
+use redis::{AsyncTypedCommands, Client, ErrorKind, IntoConnectionInfo, RedisError, RedisResult};
 use std::error::Error;
 use std::sync::OnceLock;
 use std::time::Duration;
+use redis::aio::MultiplexedConnection;
 use tracing::info;
 use urlencoding::encode;
-use bb8_redis::RedisConnectionManager;
-
 
 static REDIS: OnceLock<Pool<RedisConnectionManager>> = OnceLock::new();
 
@@ -47,7 +46,7 @@ async fn pool(conf: &Redis) -> RedisResult<Pool<RedisConnectionManager>> {
         .max_lifetime(conf.max_lifetime)
         .idle_timeout(conf.idle_timeout)
         .connection_timeout(conf.connection_timeout.unwrap_or(Duration::from_secs(30)))
-        .test_on_check_out(true)
+        .test_on_check_out(false)
         .retry_connection(true)
         .build(client(conf)?)
         .await
@@ -71,5 +70,39 @@ fn client(conf: &Redis) -> RedisResult<RedisConnectionManager> {
             conf.port,
             conf.db
         ))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct RedisConnectionManager {
+    client: Client,
+}
+
+impl RedisConnectionManager {
+    pub fn new<T: IntoConnectionInfo>(info: T) -> Result<Self, RedisError> {
+        Ok(Self {
+            client: Client::open(info.into_connection_info()?)?,
+        })
+    }
+}
+
+impl ManageConnection for RedisConnectionManager {
+    type Connection = MultiplexedConnection;
+    type Error = RedisError;
+
+    async fn connect(&self) -> Result<Self::Connection, Self::Error> {
+        self.client.get_multiplexed_async_connection().await
+    }
+
+    async fn is_valid(&self, conn: &mut Self::Connection) -> Result<(), Self::Error> {
+        let pong: String = redis::cmd("PING").query_async(conn).await?;
+        match pong.as_str() {
+            "PONG" => Ok(()),
+            _ => Err((ErrorKind::Extension, "ping request").into()),
+        }
+    }
+
+    fn has_broken(&self, _: &mut Self::Connection) -> bool {
+        false
     }
 }

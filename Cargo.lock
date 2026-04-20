@@ -191,16 +191,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bb8-redis"
-version = "0.26.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc1063effc7f6cf848bcbcc6e31b5962be75215835587d3109607c643d616f66"
-dependencies = [
- "bb8",
- "redis",
-]
-
-[[package]]
 name = "bigdecimal"
 version = "0.4.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -392,7 +382,6 @@ dependencies = [
  "aliyun-oss-rust-sdk",
  "base64",
  "bb8",
- "bb8-redis",
  "chrono",
  "dyn-fmt",
  "hex",

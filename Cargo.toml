@@ -7,7 +7,6 @@ edition = "2024"
 chrono = "*"
 moka = { version = "*", features = ["future"] }
 bb8 = "*"
-bb8-redis = "*"
 redis = { version = "*", features = ["tokio-comp", "json", "cluster", "bb8"] }
 sea-orm = { version = "2.0.0-rc.32", features = ["sqlx-mysql", "runtime-tokio-rustls", "macros"] }
 tracing = "*"
