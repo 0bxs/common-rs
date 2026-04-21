@@ -13,7 +13,6 @@ pub mod vo;
 pub use aliyun_oss_rust_sdk;
 pub use base64;
 pub use chrono;
-pub use dyn_fmt;
 pub use hex;
 pub use hmac;
 pub use moka;

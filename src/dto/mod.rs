@@ -23,7 +23,8 @@ pub struct PageDto {
     pub page_size: u64,
     #[validate(length(min = 1))]
     pub order_by: String,
-    order_type: OrderType,
+    #[serde(default)]
+    pub order_type: OrderType,
 }
 
 impl PageDto {
@@ -35,10 +36,11 @@ impl PageDto {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Default)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum OrderType {
     ASC,
+    #[default]
     DESC,
 }
 

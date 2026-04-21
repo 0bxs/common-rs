@@ -22,7 +22,6 @@ hmac = "*"
 sha2 = "*"
 hex = "*"
 percent-encoding = "*"
-dyn-fmt = "*"
 base64 = "*"
 rand = "*"
 validator = { version = "*", features = ["derive"] }

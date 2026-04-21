@@ -49,7 +49,7 @@ pub async fn get(id: i64) -> Result<Option<i64>, RunError<RedisError>> {
 
 pub async fn set(id: i64, exp0: i64) -> Result<(), RunError<RedisError>> {
     cache().insert(id, exp0).await;
-    redis().get().await?.pset_ex(key(id), exp0, exp().clone()).await?;
+    redis().get().await?.pset_ex(key(id), exp0, *exp()).await?;
     Ok(())
 }
 
