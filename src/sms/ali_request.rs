@@ -4,7 +4,7 @@ use base64::engine::general_purpose::STANDARD;
 use chrono::Utc;
 use core::str;
 use hmac::digest::InvalidLength;
-use hmac::{Hmac, Mac};
+use hmac::{Hmac, Mac, KeyInit};
 use percent_encoding::{NON_ALPHANUMERIC, utf8_percent_encode};
 use rand::random_range;
 use reqwest::{
@@ -39,7 +39,7 @@ pub fn sha256_hex(message: &str) -> String {
 
 // HMAC SHA256
 pub fn hmac256(key: &[u8], message: &str) -> Result<Vec<u8>, InvalidLength> {
-    let mut mac = Hmac::<Sha256>::new_from_slice(key)?;
+    let mut mac = <Hmac<Sha256> as KeyInit>::new_from_slice(key)?;
     mac.update(message.as_bytes());
     let signature = mac.finalize();
     Ok(signature.into_bytes().to_vec())
